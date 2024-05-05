@@ -1,0 +1,30 @@
+main {
+    text-align: center;
+    margin: 0 20%;
+}
+
+.grid,
+.big-grid-item {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+}
+.big-grid-item {
+    border: 1px solid black;
+    background-color: #fff;
+    padding:5px;
+    text-align: center;
+    font-size: 18px;
+    aspect-ratio: 1 / 1;
+}
+
+.grid-item {
+    background-color: #ccc;
+    color: #ccc;
+    text-align: center;
+    font-size: 18px;
+    display: flex;
+    justify-content: center; /* Horizontal zentrieren */
+    align-items: center; /* Vertikal zentrieren */
+}
+
