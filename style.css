@@ -28,3 +28,7 @@ main {
     align-items: center; /* Vertikal zentrieren */
 }
 
+#playerinfo {
+    display: none;
+}
+
