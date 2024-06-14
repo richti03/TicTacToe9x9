@@ -10,6 +10,7 @@ function startGame() {
 
     gameActive = true;
 
+    bigGridItem = 5;
     changeRedBorder();
 
     // Jede Zeile des Arrays initialisieren
@@ -102,12 +103,13 @@ function fieldClick(i, j) {
 
     clickedField.style.color = "black";
     refreshPlayer();
-    validateField(new Array(fields[i]), "small");
-    //bigGridItem = j + 1;
-    //changeRedBorder();
+    validateField(fields[i], "small");
+    bigGridItem = j + 1;
+    changeRedBorder();
 }
 
-function validateField (field, typ) {
+function validateField(field, typ) {
+    console.log(field);
     let p1 = field[0] + field[1] + field[2];
     let p2 = field[3] + field[4] + field[5];
     let p3 = field[6] + field[7] + field[8];
@@ -120,21 +122,46 @@ function validateField (field, typ) {
     if (p1 == 3 || p2 == 3 || p3 == 3 || p4 == 3 || p5 == 3 || p6 == 3 || p7 == 3 || p8 == 3) {
         if (typ == "small") {
             showHitbox("X hat ein Feld gewonnen.")
-            bigFields[bigGridItem-1] = 3;
+            bigFields[bigGridItem - 1] = 3;
             //TODO irgendwie markieren
-            //TODO Restliche Felder streichen
+            lockNotUseableFields();
+            validateField(bigFields, "big");
         } else {
             showHitbox("X hat gewonnen. Glückwunsch!", "good", 10000)
+            //TODO alle Felder sperren
         }
 
     } else if (p1 == 12 || p2 == 12 || p3 == 12 || p4 == 12 || p5 == 12 || p6 == 12 || p7 == 12 || p8 == 12) {
         if (typ == "small") {
             showHitbox("O hat ein Feld gewonnen.")
-            bigFields[bigGridItem-1] = 4;
+            bigFields[bigGridItem - 1] = 4;
             //TODO irgendwie markieren
-            //TODO Restliche Felder streichen
+            lockNotUseableFields();
+            validateField(bigFields, "big");
         } else {
             showHitbox("O hat gewonnen. Glückwunsch!", "good", 10000)
+            //TODO alle Felder sperren
+            
+        }
+    }
+}
+
+function lockNotUseableFields() {
+    console.log("In lockNotUseableFields");
+    for (let i = 0; i < 9; i++) {
+        //Freie Felder im abgeschlossenen BigField sperren
+        if (fields[bigGridItem-1][i] == 0) {
+            fields[bigGridItem-1][i] = 13;
+            console.log((bigGridItem) + "-" + (i + 1));
+            document.getElementById((bigGridItem) + "-" + (i + 1)).innerText = "-";
+            document.getElementById((bigGridItem) + "-" + (i + 1)).style.color = "black";
+        }
+
+        //Kleine Felder in allen großen Feldern sperren
+        if (fields[i][bigGridItem-1] == 0) {
+            fields[i][bigGridItem-1] = 13;
+            document.getElementById((i + 1) + "-" + (bigGridItem)).innerText = "-";
+            document.getElementById((i + 1) + "-" + (bigGridItem)).style.color = "black";
         }
     }
 }
