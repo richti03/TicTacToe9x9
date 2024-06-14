@@ -128,7 +128,7 @@ function validateField(field, typ) {
             validateField(bigFields, "big");
         } else {
             showHitbox("X hat gewonnen. Glückwunsch!", "good", 10000)
-            //TODO alle Felder sperren
+            endGame();
         }
 
     } else if (p1 == 12 || p2 == 12 || p3 == 12 || p4 == 12 || p5 == 12 || p6 == 12 || p7 == 12 || p8 == 12) {
@@ -140,8 +140,8 @@ function validateField(field, typ) {
             validateField(bigFields, "big");
         } else {
             showHitbox("O hat gewonnen. Glückwunsch!", "good", 10000)
-            //TODO alle Felder sperren
-            
+            endGame();
+
         }
     }
 }
@@ -150,18 +150,63 @@ function lockNotUseableFields() {
     console.log("In lockNotUseableFields");
     for (let i = 0; i < 9; i++) {
         //Freie Felder im abgeschlossenen BigField sperren
-        if (fields[bigGridItem-1][i] == 0) {
-            fields[bigGridItem-1][i] = 13;
+        if (fields[bigGridItem - 1][i] == 0) {
+            fields[bigGridItem - 1][i] = 13;
             console.log((bigGridItem) + "-" + (i + 1));
             document.getElementById((bigGridItem) + "-" + (i + 1)).innerText = "-";
             document.getElementById((bigGridItem) + "-" + (i + 1)).style.color = "black";
         }
 
         //Kleine Felder in allen großen Feldern sperren
-        if (fields[i][bigGridItem-1] == 0) {
-            fields[i][bigGridItem-1] = 13;
+        if (fields[i][bigGridItem - 1] == 0) {
+            fields[i][bigGridItem - 1] = 13;
             document.getElementById((i + 1) + "-" + (bigGridItem)).innerText = "-";
             document.getElementById((i + 1) + "-" + (bigGridItem)).style.color = "black";
         }
+    }
+}
+
+function endGame() {
+    //Alle nicht belegten Felder Sperren
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            if (fields[i][j] == 0) {
+                fields[i][j] = 13;
+                let field = document.getElementById((i + 1) + "-" + (j + 1));
+                field.innerText = "-";
+                field.style.color = "black";
+            }
+        }
+    }
+}
+
+function showWinField (winner) {
+    let fieldsToFormat;
+    let color;
+    if (winner == "x") {
+        color = "blue";
+        fieldsToFormat = new Array(
+            document.getElementById(bigGridItem + "-1"),
+            document.getElementById(bigGridItem + "-3"),
+            document.getElementById(bigGridItem + "-5"),
+            document.getElementById(bigGridItem + "-7"),
+            document.getElementById(bigGridItem + "-9")
+        )
+    } else {
+        color = "orange";
+        fieldsToFormat = new Array(
+            document.getElementById(bigGridItem + "-1"),
+            document.getElementById(bigGridItem + "-2"),
+            document.getElementById(bigGridItem + "-3"),
+            document.getElementById(bigGridItem + "-4"),
+            document.getElementById(bigGridItem + "-6"),
+            document.getElementById(bigGridItem + "-7"),
+            document.getElementById(bigGridItem + "-8"),
+            document.getElementById(bigGridItem + "-9")
+        )
+    }
+
+    for (let field : fieldsToFormat) {
+
     }
 }
