@@ -28,6 +28,19 @@ main {
     align-items: center; /* Vertikal zentrieren */
 }
 
+button {
+    background-color: #ccc;
+    text-align: center;
+    font-size: 18px;
+    margin: 10px;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+#resetButton {
+    display: none;
+}
+
 #playerinfo {
     display: none;
 }

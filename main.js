@@ -124,8 +124,10 @@ function fieldClick(i, j) {
     refreshPlayer();
     validateField(fields[i], "small");
     checkEndOfGame();
-    bigGridItem = j + 1;
-    changeRedBorder();
+    if (gameActive) {
+        bigGridItem = j + 1;
+        changeRedBorder();
+    }
 }
 
 function validateField(field, typ) {
@@ -193,6 +195,7 @@ function checkEndOfGame() {
     }
 
     if (fieldsWithNull == 0) {
+        gameActive = false;
         stopGameWithoutClearWinner();
     }
 }
@@ -212,8 +215,30 @@ function endGame() {
 }
 
 function stopGameWithoutClearWinner() {
-    showHitbox("Spielende!")
-    stop();
+    console.log("Spielende!");
+    let xFields = 0;
+    let oFields = 0;
+    bigFields.forEach(field => {
+        if (field == 1) {
+            xFields++;
+        } else if (field == 4) {
+            oFields++;
+        }
+    })
+    let winMessage = "Spielende! ";
+    if (xFields == oFields) {
+        winMessage += "Unentschieden."
+    } else if (xFields > oFields) {
+        winMessage += "X gewinnt!";
+    } else {
+        winMessage += "O gewinnt!";
+    }
+    showHitbox(winMessage, "good", 10000);
+
+    document.getElementById("playerinfo").style.display = "none";
+    document.getElementById("resetButton").style.display = "block";
+
+
 }
 
 function showWinField(winner) {
