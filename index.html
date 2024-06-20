@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe 9x9</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="var.js"></script>
@@ -9,10 +10,12 @@
 </head>
 <body>
 <main>
-    <h1>Tic Tac Toe 9x9</h1>
-    <button id="startButton" onclick="startGame()">Start Game</button>
-    <button id="resetButton" onclick="location.reload();">Reset Game</button>
-    <p id="playerinfo">Spieler: <span id="player"></span></p>
+    <div class="information">
+        <h1>Tic Tac Toe 9x9</h1>
+        <button id="startButton" onclick="startGame()">Start Game</button>
+        <button id="resetButton" onclick="location.reload();">Reset Game</button>
+        <p id="playerinfo">Spieler: <span id="player"></span></p>
+    </div>
     <div class="grid">
         <div class="big-grid-item" id="big1">
             <div class="grid-item" onclick="fieldClick(0,0)" id="1-1">+</div>
