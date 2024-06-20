@@ -4,7 +4,22 @@ function startGame() {
     refreshPlayer();
 
     document.getElementById("startButton").style.display = "none";
+    document.getElementById("toogleMiniTicTacToe").style.display = "none";
     document.getElementById("playerinfo").style.display = "block";
+
+    if (miniTicTacToe) {
+        document.getElementById("big1").style.display = "none";
+        document.getElementById("big2").style.display = "none";
+        document.getElementById("big3").style.display = "none";
+        document.getElementById("big4").style.display = "none";
+        document.getElementById("big6").style.display = "none";
+        document.getElementById("big7").style.display = "none";
+        document.getElementById("big8").style.display = "none";
+        document.getElementById("big9").style.display = "none";
+        document.getElementById("mainGrid").style.gridTemplateColumns = "repeat(1, 1fr)"
+    } else {
+
+    }
 
     gameActive = true;
 
@@ -42,9 +57,7 @@ function changeRedBorder() {
 
 function isNewBigFieldValid() {
     let fieldsWithNull = 0;
-    console.log(bigGridItem);
-    console.log(fields);
-    console.log(fields[bigGridItem - 1]);
+
     fields[bigGridItem - 1].forEach(field => {
         if (field == 0) {
             fieldsWithNull++;
@@ -124,7 +137,7 @@ function fieldClick(i, j) {
     refreshPlayer();
     validateField(fields[i], "small");
     checkEndOfGame();
-    if (gameActive) {
+    if (gameActive && !miniTicTacToe) {
         bigGridItem = j + 1;
         changeRedBorder();
     }
@@ -147,6 +160,11 @@ function validateField(field, typ) {
             showWinField("x");
             lockNotUseableFields();
             validateField(bigFields, "big");
+            if (miniTicTacToe) {
+                showHitbox("X hat gewonnen. Glückwunsch!", "good", 10000)
+
+                endGame();
+            }
         } else {
             showHitbox("X hat gewonnen. Glückwunsch!", "good", 10000)
             endGame();
@@ -159,6 +177,11 @@ function validateField(field, typ) {
             showWinField("o");
             lockNotUseableFields();
             validateField(bigFields, "big");
+            if (miniTicTacToe) {
+                showHitbox("O hat gewonnen. Glückwunsch!", "good", 10000)
+
+                endGame();
+            }
         } else {
             showHitbox("O hat gewonnen. Glückwunsch!", "good", 10000)
             endGame();
@@ -195,12 +218,26 @@ function checkEndOfGame() {
     }
 
     if (fieldsWithNull == 0) {
-        gameActive = false;
         stopGameWithoutClearWinner();
+    }
+    if (miniTicTacToe && gameActive) {
+        fieldsWithNull = 0;
+        for (let i = 0; i < 9; i++) {
+            if (fields[4][i] == 0) {
+                fieldsWithNull++;
+            }
+        }
+
+        if (fieldsWithNull == 0) {
+            gameActive = false;
+            showHitbox("Spielende! Unentschieden!", "good", 10000);
+            endGame();
+        }
     }
 }
 
 function endGame() {
+    gameActive = false;
     //Alle nicht belegten Felder Sperren
     for (let i = 0; i < 9; i++) {
         for (let j = 0; j < 9; j++) {
@@ -212,33 +249,34 @@ function endGame() {
             }
         }
     }
-}
-
-function stopGameWithoutClearWinner() {
-    console.log("Spielende!");
-    let xFields = 0;
-    let oFields = 0;
-    bigFields.forEach(field => {
-        if (field == 1) {
-            xFields++;
-        } else if (field == 4) {
-            oFields++;
-        }
-    })
-    let winMessage = "Spielende! ";
-    if (xFields == oFields) {
-        winMessage += "Unentschieden."
-    } else if (xFields > oFields) {
-        winMessage += "X gewinnt!";
-    } else {
-        winMessage += "O gewinnt!";
-    }
-    showHitbox(winMessage, "good", 10000);
 
     document.getElementById("playerinfo").style.display = "none";
     document.getElementById("resetButton").style.display = "block";
+}
 
+function stopGameWithoutClearWinner() {
+    if (gameActive) {
+        let xFields = 0;
+        let oFields = 0;
+        bigFields.forEach(field => {
+            if (field == 1) {
+                xFields++;
+            } else if (field == 4) {
+                oFields++;
+            }
+        })
+        let winMessage = "Spielende! ";
+        if (xFields == oFields) {
+            winMessage += "Unentschieden."
+        } else if (xFields > oFields) {
+            winMessage += "X gewinnt!";
+        } else {
+            winMessage += "O gewinnt!";
+        }
+        showHitbox(winMessage, "good", 10000);
 
+        endGame();
+    }
 }
 
 function showWinField(winner) {
@@ -267,4 +305,16 @@ function showWinField(winner) {
     fieldsToFormat.forEach(field => {
         field.style.backgroundColor = color;
     })
+}
+
+function toggleButton(element, identity) {
+    element.classList.toggle("on");
+    switch (identity) {
+        case "miniTicTacToe":
+            miniTicTacToe = !miniTicTacToe;
+            break;
+        case "singlePlayer":
+            singlePlayer = !singlePlayer;
+            break;
+    }
 }

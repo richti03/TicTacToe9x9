@@ -12,11 +12,15 @@
 <main>
     <div class="information">
         <h1>Tic Tac Toe 9x9</h1>
+        <div id="toogleMiniTicTacToe">
+            <p>Nur 3x3 spielen?</p>
+            <div class="toggle-button" onclick="toggleButton(this, 'miniTicTacToe')"></div>
+        </div>
         <button id="startButton" onclick="startGame()">Start Game</button>
         <button id="resetButton" onclick="location.reload();">Reset Game</button>
         <p id="playerinfo">Spieler: <span id="player"></span></p>
     </div>
-    <div class="grid">
+    <div class="grid" id="mainGrid">
         <div class="big-grid-item" id="big1">
             <div class="grid-item" onclick="fieldClick(0,0)" id="1-1">+</div>
             <div class="grid-item" onclick="fieldClick(0,1)" id="1-2">+</div>

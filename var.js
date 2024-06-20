@@ -12,3 +12,7 @@ true = o = 4
 let fields = new Array(9);
 
 let bigFields = new Array(9);
+
+let miniTicTacToe = false;
+
+let singlePlayer = false;
