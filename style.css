@@ -31,8 +31,8 @@ main {
 
     .information,
     .grid {
-        width: 90%;
-        margin: 0 2.5%;
+        width: 100%;
+        margin: 0;
     }
 }
 
@@ -125,6 +125,47 @@ button {
 
 .hitbox.bad #hitbox-progress {
     background-color: red;
+}
+
+#toogleMiniTicTacToe {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Abstand zwischen Text und Button */
+}
+
+.toggle-button {
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    background-color: #ccc;
+    border-radius: 15px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.toggle-button:before {
+    content: "";
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-button.on {
+    background-color: #4CAF50;
+}
+
+.toggle-button.on:before {
+    transform: translateX(30px);
+}
+
+#toogleMiniTicTacToe p {
+    margin: 0; /* Entfernt zusätzlichen Abstand um den Text */
 }
 
 
