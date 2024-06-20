@@ -127,10 +127,12 @@ button {
     background-color: red;
 }
 
-#toogleMiniTicTacToe {
+#toogleMiniTicTacToe,
+#toogleSinglePlayer {
     display: flex;
     align-items: center;
     gap: 10px; /* Abstand zwischen Text und Button */
+    margin: 5px 0;
 }
 
 .toggle-button {
@@ -164,7 +166,8 @@ button {
     transform: translateX(30px);
 }
 
-#toogleMiniTicTacToe p {
+#toogleMiniTicTacToe p,
+#toogleSinglePlayer p{
     margin: 0; /* Entfernt zusätzlichen Abstand um den Text */
 }
 

@@ -5,6 +5,7 @@ function startGame() {
 
     document.getElementById("startButton").style.display = "none";
     document.getElementById("toogleMiniTicTacToe").style.display = "none";
+    document.getElementById("toogleSinglePlayer").style.display = "none";
     document.getElementById("playerinfo").style.display = "block";
 
     if (miniTicTacToe) {
@@ -42,7 +43,17 @@ function startGame() {
     bigGridItem = 5;
     changeRedBorder();
 
-    showHitbox("Das Spiel beginnt!");
+    let message = "Das Spiel beginnt!";
+
+    if (singlePlayer) {
+        message += " Du spielst X."
+    }
+
+    showHitbox(message);
+
+    if (singlePlayer && player) {
+        console.log("Jetzt muss der Computer spielen");
+    }
 }
 
 function changeRedBorder() {
@@ -78,6 +89,9 @@ function refreshPlayer() {
     player = !player;
     if (player) {
         document.getElementById("player").innerText = "O";
+        if (singlePlayer &&  gameActive) {
+            console.log("Refresh Player: Computer muss spielen.")
+        }
     } else {
         document.getElementById("player").innerText = "X";
     }

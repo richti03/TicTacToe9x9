@@ -5,7 +5,7 @@ let bigGridItem = 5;
 let player = false;
 /*
 false = x = 1
-true = o = 4
+true = o = 4 = Computer
  */
 
 // Erstellen eines leeren 9x9 Arrays
