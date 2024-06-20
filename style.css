@@ -1,6 +1,39 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
 main {
     text-align: center;
-    margin: 0 20%;
+    margin: 10%;
+    display: flex;
+}
+
+.information {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* Center text horizontally */
+    width: 50%;
+}
+
+.grid {
+    width: 50%;
+}
+
+/* MediaQuery für schmale Bildschirme */
+@media (max-width: 700px) {
+    main {
+        display: block;
+    }
+
+    .information,
+    .grid {
+        width: 90%;
+        margin: 0 2.5%;
+    }
 }
 
 .grid,
