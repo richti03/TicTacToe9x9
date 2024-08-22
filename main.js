@@ -5,7 +5,7 @@ function startGame() {
 
     document.getElementById("startButton").style.display = "none";
     document.getElementById("toogleMiniTicTacToe").style.display = "none";
-    //document.getElementById("toogleSinglePlayer").style.display = "none";
+    document.getElementById("toogleSinglePlayer").style.display = "none";
     document.getElementById("playerinfo").style.display = "block";
     document.getElementById("stopButton").style.display = "block";
 
@@ -52,6 +52,7 @@ function startGame() {
 
     if (singlePlayer && player) {
         console.log("Jetzt muss der Computer spielen");
+        computerMove();
     }
 }
 
@@ -89,7 +90,8 @@ function refreshPlayer() {
     if (player) {
         document.getElementById("player").innerText = "O";
         if (singlePlayer &&  gameActive) {
-            console.log("Refresh Player: Computer muss spielen.")
+            console.log("Refresh Player: Computer muss spielen.");
+            computerMove();
         }
     } else {
         document.getElementById("player").innerText = "X";
@@ -124,35 +126,40 @@ function showHitbox(message, type = 'good', duration = 3000) {
 
 
 function fieldClick(i, j) {
-    clickedField = document.getElementById((i + 1) + "-" + (j + 1));
-    if (gameActive == false) {
-        showHitbox("Bitte beginne zuerst das Spiel.", "bad");
-        return;
-    }
-    if (bigGridItem != i + 1) {
-        showHitbox("Dieses Feld kann derzeit nicht genutzt werden.", "bad")
-        return;
-    }
-    if (fields[i][j] != 0) {
-        showHitbox("Dieses Feld ist bereits belegt.", "bad");
-        return;
-    }
-    if (player) {
-        clickedField.innerText = "O";
-        fields[i][j] = 4;
+    if (singlePlayer && player) {
+        showHitbox("Der Computer ist dran", "bad");
     } else {
-        clickedField.innerText = "X";
-        fields[i][j] = 1;
-    }
 
-    clickedField.style.color = "black";
+        clickedField = document.getElementById((i + 1) + "-" + (j + 1));
+        if (gameActive == false) {
+            showHitbox("Bitte beginne zuerst das Spiel.", "bad");
+            return;
+        }
+        if (bigGridItem != i + 1) {
+            showHitbox("Dieses Feld kann derzeit nicht genutzt werden.", "bad")
+            return;
+        }
+        if (fields[i][j] != 0) {
+            showHitbox("Dieses Feld ist bereits belegt.", "bad");
+            return;
+        }
+        if (player) {
+            clickedField.innerText = "O";
+            fields[i][j] = 4;
+        } else {
+            clickedField.innerText = "X";
+            fields[i][j] = 1;
+        }
 
-    refreshPlayer();
-    validateField(fields[i], "small");
-    checkEndOfGame();
-    if (gameActive && !miniTicTacToe) {
-        bigGridItem = j + 1;
-        changeRedBorder();
+        clickedField.style.color = "black";
+
+        refreshPlayer();
+        validateField(fields[i], "small");
+        checkEndOfGame();
+        if (gameActive && !miniTicTacToe) {
+            bigGridItem = j + 1;
+            changeRedBorder();
+        }
     }
 }
 
