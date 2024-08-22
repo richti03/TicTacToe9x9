@@ -16,7 +16,14 @@
             <p>Nur 3x3 spielen?</p>
             <div class="toggle-button" onclick="toggleButton(this, 'miniTicTacToe')"></div>
         </div>
+        <!--
+        <div id="toogleSinglePlayer">
+            <p>Alleine Spielen?</p>
+            <div class="toggle-button" onclick="toggleButton(this, 'singlePlayer')"></div>
+        </div>
+        -->
         <button id="startButton" onclick="startGame()">Start Game</button>
+        <button id="stopButton" onclick="if (confirm('Möchtest du das Spiel wirklich beenden?')) {location.reload()}">Spiel beenden</button>
         <button id="resetButton" onclick="location.reload();">Reset Game</button>
         <p id="playerinfo">Spieler: <span id="player"></span></p>
     </div>
