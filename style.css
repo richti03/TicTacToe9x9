@@ -42,6 +42,11 @@ main {
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 10px;
 }
+
+.big-grid-item.playable-board {
+    border: 4px solid #c62828;
+    box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.12);
+}
 .big-grid-item {
     border: 1px solid black;
     background-color: #fff;
@@ -145,6 +150,9 @@ button {
     position: relative;
     cursor: pointer;
     transition: background-color 0.3s;
+    border: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .toggle-button:before {
@@ -171,7 +179,6 @@ button {
 #toogleSinglePlayer p{
     margin: 0; /* Entfernt zusätzlichen Abstand um den Text */
 }
-
 
 
 
