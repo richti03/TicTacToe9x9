@@ -165,8 +165,13 @@ function endGame() {
 }
 
 function showWinField(boardIndex, winner) {
-    const color = winner === X ? "#8ed7dd" : "#e8bc82";
-    document.getElementById(`big${boardIndex + 1}`).style.backgroundColor = color;
+    const color = winner === X ? "#6ebcc3" : "#cf9f62";
+    const symbolCells = winner === X ? [0, 2, 4, 6, 8] : [1, 3, 5, 7];
+
+    symbolCells.forEach(cellIndex => {
+        const element = document.getElementById(`${boardIndex + 1}-${cellIndex + 1}`);
+        element.style.backgroundColor = color;
+    });
 }
 
 function scheduleComputerMove() {
@@ -259,6 +264,11 @@ function minimax(state, mark, depth, alpha, beta) {
 function chooseComputerMove() {
     const state = {fields, bigFields, forcedBoard: bigGridItem - 1};
     const moves = getLegalMoves(fields, bigFields, bigGridItem - 1);
+    const isOpeningMove = fields.every(board => board.every(value => value === 0));
+    if (isOpeningMove) {
+        const variedOpenings = moves.filter(move => [0, 2, 4, 6, 8].includes(move.cell));
+        return variedOpenings[Math.floor(Math.random() * variedOpenings.length)];
+    }
     const winningMoves = moves.filter(move => {
         const board = fields[move.board].slice();
         board[move.cell] = O;
