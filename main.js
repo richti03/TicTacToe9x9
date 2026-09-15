@@ -73,6 +73,7 @@ function showHitbox(message, type = "good", duration = 3000) {
 }
 
 function fieldClick(boardIndex, cellIndex) {
+    if (onlineMode) return playRemoteMove(boardIndex, cellIndex);
     if (!gameActive) return showHitbox("Bitte beginne zuerst das Spiel.", "bad");
     if (singlePlayer && (player || isAiThinking)) {
         return showHitbox("Bitte warte auf den Zug des Computers.", "bad");

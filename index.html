@@ -5,21 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe 9x9</title>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script src="var.js"></script>
     <script src="main.js"></script>
+    <script src="multiplayer.js"></script>
 </head>
 <body>
 <main>
     <div class="information">
         <h1>Tic Tac Toe 9x9</h1>
-        <div id="toogleMiniTicTacToe">
+        <div id="toogleMiniTicTacToe" class="setup-control">
             <p>Nur 3x3 spielen?</p>
             <div class="toggle-button" onclick="toggleButton(this, 'miniTicTacToe')"></div>
         </div>
-        <div id="toogleSinglePlayer">
+        <div id="toogleSinglePlayer" class="setup-control">
             <p>Gegen den Computer?</p>
             <button class="toggle-button" type="button" aria-label="Singleplayer umschalten" aria-pressed="false" onclick="toggleButton(this, 'singlePlayer')"></button>
         </div>
+        <section class="online-panel setup-control" aria-labelledby="onlineTitle">
+            <h2 id="onlineTitle">Remote Multiplayer</h2>
+            <p id="onlineStatus" aria-live="polite">Verbindung wird vorbereitet …</p>
+            <button id="createOnlineButton" type="button" onclick="createOnlineGame()" disabled>Online-Spiel erstellen</button>
+            <div class="join-row">
+                <label for="gameCode">Spielcode</label>
+                <input id="gameCode" maxlength="6" autocomplete="off" placeholder="ABC123">
+                <button id="joinOnlineButton" type="button" onclick="joinOnlineGame()" disabled>Beitreten</button>
+            </div>
+        </section>
         <button id="startButton" onclick="startGame()">Spiel starten</button>
         <button id="stopButton" onclick="if (confirm('Möchtest du das Spiel wirklich beenden?')) {location.reload()}">Spiel beenden</button>
         <button id="resetButton" onclick="location.reload();">Reset Game</button>

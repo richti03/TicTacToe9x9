@@ -180,5 +180,26 @@ button {
     margin: 0; /* Entfernt zusätzlichen Abstand um den Text */
 }
 
+.online-panel {
+    width: min(100%, 420px);
+    margin: 18px 0;
+    padding: 16px;
+    border: 1px solid #bbb;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.online-panel h2 { margin: 0 0 8px; }
+.online-panel p { margin: 6px 0; }
+.online-panel .error { color: #b71c1c; }
+.join-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+.join-row input {
+    width: 7em;
+    padding: 7px;
+    font: inherit;
+    text-transform: uppercase;
+    border: 1px solid #888;
+    border-radius: 6px;
+}
 
 
