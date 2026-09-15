@@ -1,334 +1,301 @@
-function startGame() {
-    player = Math.random() < 0.5;
+const X = 1;
+const O = 4;
+const CLOSED = 13;
+const WIN_LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+];
 
-    refreshPlayer();
+function startGame() {
+    fields = Array.from({length: 9}, () => Array(9).fill(0));
+    bigFields = Array(9).fill(0);
+    gameActive = true;
+    isAiThinking = false;
+    player = Math.random() < 0.5;
+    bigGridItem = 5;
 
     document.getElementById("startButton").style.display = "none";
     document.getElementById("toogleMiniTicTacToe").style.display = "none";
-    //document.getElementById("toogleSinglePlayer").style.display = "none";
+    document.getElementById("toogleSinglePlayer").style.display = "none";
     document.getElementById("playerinfo").style.display = "block";
     document.getElementById("stopButton").style.display = "block";
 
     if (miniTicTacToe) {
-        document.getElementById("big1").style.display = "none";
-        document.getElementById("big2").style.display = "none";
-        document.getElementById("big3").style.display = "none";
-        document.getElementById("big4").style.display = "none";
-        document.getElementById("big6").style.display = "none";
-        document.getElementById("big7").style.display = "none";
-        document.getElementById("big8").style.display = "none";
-        document.getElementById("big9").style.display = "none";
-        document.getElementById("mainGrid").style.gridTemplateColumns = "repeat(1, 1fr)"
+        document.querySelectorAll(".big-grid-item").forEach((item, index) => {
+            item.style.display = index === 4 ? "grid" : "none";
+        });
+        document.getElementById("mainGrid").style.gridTemplateColumns = "1fr";
     }
 
-    gameActive = true;
-
-    // Jede Zeile des Arrays initialisieren
-    for (let i = 0; i < 9; i++) {
-        fields[i] = new Array(9);
-    }
-
-// Optionale Initialisierung der Array-Werte, z.B. mit Nullen
-    for (let i = 0; i < 9; i++) {
-        for (let j = 0; j < 9; j++) {
-            fields[i][j] = 0;
-        }
-    }
-
-    for (let i = 0; i < 9; i++) {
-        bigFields[i] = 0;
-    }
-
-    bigGridItem = 5;
+    refreshPlayerInfo();
     changeRedBorder();
+    showHitbox(singlePlayer ? "Das Spiel beginnt! Du spielst X." : "Das Spiel beginnt!");
+    scheduleComputerMove();
+}
 
-    let message = "Das Spiel beginnt!";
-
-    if (singlePlayer) {
-        message += " Du spielst X."
-    }
-
-    showHitbox(message);
-
-    if (singlePlayer && player) {
-        console.log("Jetzt muss der Computer spielen");
-    }
+function getPlayableBoards(stateFields = fields, stateBigFields = bigFields, forcedBoard = bigGridItem - 1) {
+    if (miniTicTacToe) return stateBigFields[4] === 0 ? [4] : [];
+    const openBoards = stateBigFields
+        .map((value, index) => value === 0 && stateFields[index].includes(0) ? index : -1)
+        .filter(index => index >= 0);
+    return openBoards.includes(forcedBoard) ? [forcedBoard] : openBoards;
 }
 
 function changeRedBorder() {
-    document.querySelectorAll('.big-grid-item').forEach(bigItem => {
-        bigItem.style.border = "1px solid black";
-    })
-
-    document.getElementById("big" + bigGridItem).style.border = "4px solid red";
-
-    isNewBigFieldValid();
+    const playable = getPlayableBoards();
+    document.querySelectorAll(".big-grid-item").forEach((item, index) => {
+        item.classList.toggle("playable-board", gameActive && playable.includes(index));
+    });
 }
 
-function isNewBigFieldValid() {
-    let fieldsWithNull = 0;
-
-    fields[bigGridItem - 1].forEach(field => {
-        if (field == 0) {
-            fieldsWithNull++;
-        }
-    })
-    if (fieldsWithNull == 0) {
-        if (bigGridItem != 9) {
-            bigGridItem++;
-        } else {
-            bigGridItem = 1;
-        }
-
-        changeRedBorder();
+function refreshPlayerInfo() {
+    const label = document.getElementById("player");
+    if (singlePlayer && player) {
+        label.innerText = "O (Computer denkt …)";
+    } else {
+        label.innerText = player ? "O" : "X";
     }
 }
 
-function refreshPlayer() {
+function showHitbox(message, type = "good", duration = 3000) {
+    const hitbox = document.getElementById("hitbox");
+    const progress = document.getElementById("hitbox-progress");
+    document.getElementById("hitbox-message").textContent = message;
+    hitbox.className = `hitbox show ${type}`;
+    progress.style.transition = "none";
+    progress.style.width = "100%";
+    void progress.offsetWidth;
+    progress.style.transition = `width ${duration}ms linear`;
+    progress.style.width = "0%";
+    setTimeout(() => hitbox.classList.remove("show"), duration);
+}
+
+function fieldClick(boardIndex, cellIndex) {
+    if (!gameActive) return showHitbox("Bitte beginne zuerst das Spiel.", "bad");
+    if (singlePlayer && (player || isAiThinking)) {
+        return showHitbox("Bitte warte auf den Zug des Computers.", "bad");
+    }
+    playMove(boardIndex, cellIndex);
+}
+
+function playMove(boardIndex, cellIndex, computerMove = false) {
+    if (!gameActive || fields[boardIndex][cellIndex] !== 0) {
+        if (!computerMove) showHitbox("Dieses Feld ist bereits belegt.", "bad");
+        return false;
+    }
+    if (!getPlayableBoards().includes(boardIndex)) {
+        if (!computerMove) showHitbox("Dieses Feld kann derzeit nicht genutzt werden.", "bad");
+        return false;
+    }
+
+    const mark = player ? O : X;
+    fields[boardIndex][cellIndex] = mark;
+    const element = document.getElementById(`${boardIndex + 1}-${cellIndex + 1}`);
+    element.innerText = mark === O ? "O" : "X";
+    element.style.color = "black";
+
+    finishSmallBoard(boardIndex, mark);
+    if (finishGameIfNecessary()) return true;
+
+    bigGridItem = cellIndex + 1;
     player = !player;
-    if (player) {
-        document.getElementById("player").innerText = "O";
-        if (singlePlayer &&  gameActive) {
-            console.log("Refresh Player: Computer muss spielen.")
-        }
-    } else {
-        document.getElementById("player").innerText = "X";
+    isAiThinking = false;
+    refreshPlayerInfo();
+    changeRedBorder();
+    scheduleComputerMove();
+    return true;
+}
+
+function lineWinner(board) {
+    for (const line of WIN_LINES) {
+        if (board[line[0]] === X && board[line[1]] === X && board[line[2]] === X) return X;
+        if (board[line[0]] === O && board[line[1]] === O && board[line[2]] === O) return O;
     }
+    return 0;
 }
 
-function showHitbox(message, type = 'good', duration = 3000) {
-    const hitbox = document.getElementById('hitbox');
-    const hitboxMessage = document.getElementById('hitbox-message');
-    const hitboxProgress = document.getElementById('hitbox-progress');
-
-    hitboxMessage.textContent = message;
-    hitbox.className = 'hitbox show'; // Reset classes
-    hitbox.classList.add(type); // Add type class (good or bad)
-
-    // Reset progress bar
-    hitboxProgress.style.transition = 'none';
-    hitboxProgress.style.width = '100%';
-
-    // Trigger reflow to restart animation
-    void hitboxProgress.offsetWidth;
-
-    // Animate progress bar
-    hitboxProgress.style.transition = `width ${duration}ms linear`;
-    hitboxProgress.style.width = '0%';
-
-    // Hide the hitbox after the specified duration
-    setTimeout(() => {
-        hitbox.classList.remove('show');
-    }, duration);
-}
-
-
-function fieldClick(i, j) {
-    clickedField = document.getElementById((i + 1) + "-" + (j + 1));
-    if (gameActive == false) {
-        showHitbox("Bitte beginne zuerst das Spiel.", "bad");
+function finishSmallBoard(boardIndex, mark) {
+    if (lineWinner(fields[boardIndex]) !== mark) {
+        if (!fields[boardIndex].includes(0)) bigFields[boardIndex] = CLOSED;
         return;
     }
-    if (bigGridItem != i + 1) {
-        showHitbox("Dieses Feld kann derzeit nicht genutzt werden.", "bad")
-        return;
-    }
-    if (fields[i][j] != 0) {
-        showHitbox("Dieses Feld ist bereits belegt.", "bad");
-        return;
-    }
-    if (player) {
-        clickedField.innerText = "O";
-        fields[i][j] = 4;
-    } else {
-        clickedField.innerText = "X";
-        fields[i][j] = 1;
-    }
-
-    clickedField.style.color = "black";
-
-    refreshPlayer();
-    validateField(fields[i], "small");
-    checkEndOfGame();
-    if (gameActive && !miniTicTacToe) {
-        bigGridItem = j + 1;
-        changeRedBorder();
-    }
-}
-
-function validateField(field, typ) {
-    let p1 = field[0] + field[1] + field[2];
-    let p2 = field[3] + field[4] + field[5];
-    let p3 = field[6] + field[7] + field[8];
-    let p4 = field[0] + field[3] + field[6];
-    let p5 = field[1] + field[4] + field[7];
-    let p6 = field[2] + field[5] + field[8];
-    let p7 = field[0] + field[4] + field[8];
-    let p8 = field[2] + field[4] + field[6];
-
-    if (p1 == 3 || p2 == 3 || p3 == 3 || p4 == 3 || p5 == 3 || p6 == 3 || p7 == 3 || p8 == 3) {
-        if (typ == "small") {
-            showHitbox("X hat ein Feld gewonnen.")
-            bigFields[bigGridItem - 1] = 1;
-            showWinField("x");
-            lockNotUseableFields();
-            validateField(bigFields, "big");
-            if (miniTicTacToe) {
-                showHitbox("X hat gewonnen. Glückwunsch!", "good", 10000)
-
-                endGame();
-            }
-        } else {
-            showHitbox("X hat gewonnen. Glückwunsch!", "good", 10000)
-            endGame();
-        }
-
-    } else if (p1 == 12 || p2 == 12 || p3 == 12 || p4 == 12 || p5 == 12 || p6 == 12 || p7 == 12 || p8 == 12) {
-        if (typ == "small") {
-            showHitbox("O hat ein Feld gewonnen.")
-            bigFields[bigGridItem - 1] = 4;
-            showWinField("o");
-            lockNotUseableFields();
-            validateField(bigFields, "big");
-            if (miniTicTacToe) {
-                showHitbox("O hat gewonnen. Glückwunsch!", "good", 10000)
-
-                endGame();
-            }
-        } else {
-            showHitbox("O hat gewonnen. Glückwunsch!", "good", 10000)
-            endGame();
-        }
-    }
-}
-
-function lockNotUseableFields() {
+    bigFields[boardIndex] = mark;
     for (let i = 0; i < 9; i++) {
-        //Freie Felder im abgeschlossenen BigField sperren
-        if (fields[bigGridItem - 1][i] == 0) {
-            fields[bigGridItem - 1][i] = 13;
-            document.getElementById((bigGridItem) + "-" + (i + 1)).innerText = "-";
-            document.getElementById((bigGridItem) + "-" + (i + 1)).style.color = "black";
-        }
-
-        //Kleine Felder in allen großen Feldern sperren
-        if (fields[i][bigGridItem - 1] == 0) {
-            fields[i][bigGridItem - 1] = 13;
-            document.getElementById((i + 1) + "-" + (bigGridItem)).innerText = "-";
-            document.getElementById((i + 1) + "-" + (bigGridItem)).style.color = "black";
+        if (fields[boardIndex][i] === 0) {
+            fields[boardIndex][i] = CLOSED;
+            const element = document.getElementById(`${boardIndex + 1}-${i + 1}`);
+            element.innerText = "–";
+            element.style.color = "black";
         }
     }
+    showWinField(boardIndex, mark);
+    showHitbox(`${mark === X ? "X" : "O"} hat ein Feld gewonnen.`);
 }
 
-function checkEndOfGame() {
-    let fieldsWithNull = 0;
-    for (let i = 0; i < 9; i++) {
-        for (let j = 0; j < 9; j++) {
-            if (fields[i][j] == 0) {
-                fieldsWithNull++;
-            }
-        }
+function finishGameIfNecessary() {
+    const winner = miniTicTacToe ? lineWinner(fields[4]) : lineWinner(bigFields);
+    if (winner) {
+        const text = singlePlayer
+            ? (winner === X ? "Du hast gewonnen. Stark gespielt!" : "Der Computer gewinnt. Versuch es noch einmal!")
+            : `${winner === X ? "X" : "O"} hat gewonnen. Glückwunsch!`;
+        showHitbox(text, "good", 10000);
+        endGame();
+        return true;
     }
-
-    if (fieldsWithNull == 0) {
-        stopGameWithoutClearWinner();
+    if (getPlayableBoards(fields, bigFields, bigGridItem - 1).length === 0) {
+        const xBoards = bigFields.filter(value => value === X).length;
+        const oBoards = bigFields.filter(value => value === O).length;
+        let result = "Unentschieden.";
+        if (!miniTicTacToe && xBoards !== oBoards) result = `${xBoards > oBoards ? "X" : "O"} gewinnt nach Feldern!`;
+        showHitbox(`Spielende! ${result}`, "good", 10000);
+        endGame();
+        return true;
     }
-    if (miniTicTacToe && gameActive) {
-        fieldsWithNull = 0;
-        for (let i = 0; i < 9; i++) {
-            if (fields[4][i] == 0) {
-                fieldsWithNull++;
-            }
-        }
-
-        if (fieldsWithNull == 0) {
-            gameActive = false;
-            showHitbox("Spielende! Unentschieden!", "good", 10000);
-            endGame();
-        }
-    }
+    return false;
 }
 
 function endGame() {
     gameActive = false;
-    //Alle nicht belegten Felder Sperren
-    for (let i = 0; i < 9; i++) {
-        for (let j = 0; j < 9; j++) {
-            if (fields[i][j] == 0) {
-                fields[i][j] = 13;
-                let field = document.getElementById((i + 1) + "-" + (j + 1));
-                field.innerText = "-";
-                field.style.color = "black";
-            }
-        }
-    }
-
+    isAiThinking = false;
+    changeRedBorder();
     document.getElementById("playerinfo").style.display = "none";
     document.getElementById("stopButton").style.display = "none";
     document.getElementById("resetButton").style.display = "block";
 }
 
-function stopGameWithoutClearWinner() {
-    if (gameActive) {
-        let xFields = 0;
-        let oFields = 0;
-        bigFields.forEach(field => {
-            if (field == 1) {
-                xFields++;
-            } else if (field == 4) {
-                oFields++;
-            }
-        })
-        let winMessage = "Spielende! ";
-        if (xFields == oFields) {
-            winMessage += "Unentschieden."
-        } else if (xFields > oFields) {
-            winMessage += "X gewinnt!";
-        } else {
-            winMessage += "O gewinnt!";
-        }
-        showHitbox(winMessage, "good", 10000);
-
-        endGame();
-    }
+function showWinField(boardIndex, winner) {
+    const color = winner === X ? "#8ed7dd" : "#e8bc82";
+    document.getElementById(`big${boardIndex + 1}`).style.backgroundColor = color;
 }
 
-function showWinField(winner) {
-    let fieldsToFormat;
-    let color;
-    if (winner == "x") {
-        color = "#6ebcc3";
-        fieldsToFormat = new Array(
-            document.getElementById(bigGridItem + "-1"),
-            document.getElementById(bigGridItem + "-3"),
-            document.getElementById(bigGridItem + "-5"),
-            document.getElementById(bigGridItem + "-7"),
-            document.getElementById(bigGridItem + "-9")
-        )
-    } else {
-        color = "#cf9f62";
-        fieldsToFormat = new Array(
-            document.getElementById(bigGridItem + "-2"),
-            document.getElementById(bigGridItem + "-4"),
-            document.getElementById(bigGridItem + "-6"),
-            document.getElementById(bigGridItem + "-8")
-        )
+function scheduleComputerMove() {
+    if (!singlePlayer || !gameActive || !player || isAiThinking) return;
+    isAiThinking = true;
+    refreshPlayerInfo();
+    setTimeout(() => {
+        if (!gameActive || !player) return;
+        const move = chooseComputerMove();
+        if (move) playMove(move.board, move.cell, true);
+    }, 450);
+}
+
+function getLegalMoves(stateFields, stateBigFields, forcedBoard) {
+    const moves = [];
+    for (const board of getPlayableBoards(stateFields, stateBigFields, forcedBoard)) {
+        stateFields[board].forEach((value, cell) => {
+            if (value === 0) moves.push({board, cell});
+        });
     }
+    return moves;
+}
 
+function simulateMove(state, move, mark) {
+    const next = {
+        fields: state.fields.map(board => board.slice()),
+        bigFields: state.bigFields.slice(),
+        forcedBoard: move.cell
+    };
+    next.fields[move.board][move.cell] = mark;
+    if (lineWinner(next.fields[move.board]) === mark) {
+        next.bigFields[move.board] = mark;
+        next.fields[move.board] = next.fields[move.board].map(value => value === 0 ? CLOSED : value);
+    } else if (!next.fields[move.board].includes(0)) {
+        next.bigFields[move.board] = CLOSED;
+    }
+    return next;
+}
 
-    fieldsToFormat.forEach(field => {
-        field.style.backgroundColor = color;
-    })
+function evaluateLine(board, line) {
+    const values = line.map(index => board[index]);
+    if (values.includes(CLOSED) || (values.includes(X) && values.includes(O))) return 0;
+    const oCount = values.filter(value => value === O).length;
+    const xCount = values.filter(value => value === X).length;
+    return oCount ? [0, 3, 22, 500][oCount] : -[0, 3, 24, 500][xCount];
+}
+
+function evaluateState(state) {
+    if (miniTicTacToe) {
+        if (state.bigFields[4] === O) return 100000;
+        if (state.bigFields[4] === X) return -100000;
+    }
+    const globalWinner = lineWinner(state.bigFields);
+    if (globalWinner === O) return 100000;
+    if (globalWinner === X) return -100000;
+    let score = 0;
+    for (const line of WIN_LINES) score += evaluateLine(state.bigFields, line) * 20;
+    state.bigFields.forEach((value, index) => {
+        if (value === O) score += 400;
+        else if (value === X) score -= 400;
+        else if (value === 0) for (const line of WIN_LINES) score += evaluateLine(state.fields[index], line);
+    });
+    return score;
+}
+
+function minimax(state, mark, depth, alpha, beta) {
+    const score = evaluateState(state);
+    if (Math.abs(score) >= 100000 || depth === 0) return score;
+    const moves = getLegalMoves(state.fields, state.bigFields, state.forcedBoard);
+    if (!moves.length) return score;
+
+    if (mark === O) {
+        let best = -Infinity;
+        for (const move of moves) {
+            best = Math.max(best, minimax(simulateMove(state, move, O), X, depth - 1, alpha, beta));
+            alpha = Math.max(alpha, best);
+            if (beta <= alpha) break;
+        }
+        return best;
+    }
+    let best = Infinity;
+    for (const move of moves) {
+        best = Math.min(best, minimax(simulateMove(state, move, X), O, depth - 1, alpha, beta));
+        beta = Math.min(beta, best);
+        if (beta <= alpha) break;
+    }
+    return best;
+}
+
+function chooseComputerMove() {
+    const state = {fields, bigFields, forcedBoard: bigGridItem - 1};
+    const moves = getLegalMoves(fields, bigFields, bigGridItem - 1);
+    const winningMoves = moves.filter(move => {
+        const board = fields[move.board].slice();
+        board[move.cell] = O;
+        return lineWinner(board) === O;
+    });
+    if (winningMoves.length) {
+        return winningMoves.sort((a, b) => evaluateState(simulateMove(state, b, O)) - evaluateState(simulateMove(state, a, O)))[0];
+    }
+    const blockingMoves = moves.filter(move => {
+        const board = fields[move.board].slice();
+        board[move.cell] = X;
+        return lineWinner(board) === X;
+    });
+    if (blockingMoves.length) return blockingMoves[0];
+
+    let bestScore = -Infinity;
+    let bestMoves = [];
+    const remaining = moves.length;
+    const depth = miniTicTacToe ? Math.min(9, fields[4].filter(value => value === 0).length) : (remaining > 20 ? 2 : 3);
+
+    for (const move of moves) {
+        const next = simulateMove(state, move, O);
+        let score = minimax(next, X, depth - 1, -Infinity, Infinity);
+        score += [3, 2, 3, 2, 5, 2, 3, 2, 3][move.cell];
+        if (score > bestScore) {
+            bestScore = score;
+            bestMoves = [move];
+        } else if (score === bestScore) {
+            bestMoves.push(move);
+        }
+    }
+    return bestMoves[Math.floor(Math.random() * bestMoves.length)];
 }
 
 function toggleButton(element, identity) {
     element.classList.toggle("on");
-    switch (identity) {
-        case "miniTicTacToe":
-            miniTicTacToe = !miniTicTacToe;
-            break;
-        case "singlePlayer":
-            singlePlayer = !singlePlayer;
-            break;
-    }
+    element.setAttribute("aria-pressed", element.classList.contains("on"));
+    if (identity === "miniTicTacToe") miniTicTacToe = !miniTicTacToe;
+    if (identity === "singlePlayer") singlePlayer = !singlePlayer;
 }
