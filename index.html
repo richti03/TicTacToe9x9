@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,13 +16,11 @@
             <p>Nur 3x3 spielen?</p>
             <div class="toggle-button" onclick="toggleButton(this, 'miniTicTacToe')"></div>
         </div>
-        <!--
         <div id="toogleSinglePlayer">
-            <p>Alleine Spielen?</p>
-            <div class="toggle-button" onclick="toggleButton(this, 'singlePlayer')"></div>
+            <p>Gegen den Computer?</p>
+            <button class="toggle-button" type="button" aria-label="Singleplayer umschalten" aria-pressed="false" onclick="toggleButton(this, 'singlePlayer')"></button>
         </div>
-        -->
-        <button id="startButton" onclick="startGame()">Start Game</button>
+        <button id="startButton" onclick="startGame()">Spiel starten</button>
         <button id="stopButton" onclick="if (confirm('Möchtest du das Spiel wirklich beenden?')) {location.reload()}">Spiel beenden</button>
         <button id="resetButton" onclick="location.reload();">Reset Game</button>
         <p id="playerinfo">Spieler: <span id="player"></span></p>

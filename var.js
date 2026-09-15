@@ -16,3 +16,5 @@ let bigFields = new Array(9);
 let miniTicTacToe = false;
 
 let singlePlayer = false;
+
+let isAiThinking = false;
