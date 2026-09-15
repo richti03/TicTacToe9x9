@@ -36,10 +36,11 @@ function startGame() {
 
 function getPlayableBoards(stateFields = fields, stateBigFields = bigFields, forcedBoard = bigGridItem - 1) {
     if (miniTicTacToe) return stateBigFields[4] === 0 ? [4] : [];
-    const openBoards = stateBigFields
-        .map((value, index) => value === 0 && stateFields[index].includes(0) ? index : -1)
-        .filter(index => index >= 0);
-    return openBoards.includes(forcedBoard) ? [forcedBoard] : openBoards;
+    for (let offset = 0; offset < 9; offset++) {
+        const boardIndex = (forcedBoard + offset) % 9;
+        if (stateBigFields[boardIndex] === 0 && stateFields[boardIndex].includes(0)) return [boardIndex];
+    }
+    return [];
 }
 
 function changeRedBorder() {
@@ -116,21 +117,48 @@ function lineWinner(board) {
 }
 
 function finishSmallBoard(boardIndex, mark) {
-    if (lineWinner(fields[boardIndex]) !== mark) {
-        if (!fields[boardIndex].includes(0)) bigFields[boardIndex] = CLOSED;
-        return;
+    if (lineWinner(fields[boardIndex]) === mark) {
+        bigFields[boardIndex] = mark;
+        closeBoard(boardIndex);
+        showWinField(boardIndex, mark);
+        showHitbox(`${mark === X ? "X" : "O"} hat ein Feld gewonnen.`);
+    } else if (!fields[boardIndex].includes(0)) {
+        bigFields[boardIndex] = CLOSED;
+        closeBoard(boardIndex);
     }
-    bigFields[boardIndex] = mark;
-    for (let i = 0; i < 9; i++) {
-        if (fields[boardIndex][i] === 0) {
-            fields[boardIndex][i] = CLOSED;
-            const element = document.getElementById(`${boardIndex + 1}-${i + 1}`);
-            element.innerText = "–";
-            element.style.color = "black";
-        }
+}
+
+function closeBoard(initialBoardIndex) {
+    const boardsToClose = [initialBoardIndex];
+    const closedBoards = new Set();
+
+    while (boardsToClose.length) {
+        const boardIndex = boardsToClose.shift();
+        if (closedBoards.has(boardIndex)) continue;
+        closedBoards.add(boardIndex);
+        if (bigFields[boardIndex] === 0) bigFields[boardIndex] = CLOSED;
+
+        fields[boardIndex].forEach((value, cellIndex) => {
+            if (value === 0) markCellClosed(boardIndex, cellIndex);
+        });
+        if (miniTicTacToe) continue;
+
+        fields.forEach((board, otherBoardIndex) => {
+            if (bigFields[otherBoardIndex] !== 0 || board[boardIndex] !== 0) return;
+            markCellClosed(otherBoardIndex, boardIndex);
+            if (!board.includes(0)) {
+                bigFields[otherBoardIndex] = CLOSED;
+                boardsToClose.push(otherBoardIndex);
+            }
+        });
     }
-    showWinField(boardIndex, mark);
-    showHitbox(`${mark === X ? "X" : "O"} hat ein Feld gewonnen.`);
+}
+
+function markCellClosed(boardIndex, cellIndex) {
+    fields[boardIndex][cellIndex] = CLOSED;
+    const element = document.getElementById(`${boardIndex + 1}-${cellIndex + 1}`);
+    element.innerText = "–";
+    element.style.color = "black";
 }
 
 function finishGameIfNecessary() {
@@ -204,11 +232,33 @@ function simulateMove(state, move, mark) {
     next.fields[move.board][move.cell] = mark;
     if (lineWinner(next.fields[move.board]) === mark) {
         next.bigFields[move.board] = mark;
-        next.fields[move.board] = next.fields[move.board].map(value => value === 0 ? CLOSED : value);
+        closeSimulatedBoard(next, move.board);
     } else if (!next.fields[move.board].includes(0)) {
         next.bigFields[move.board] = CLOSED;
+        closeSimulatedBoard(next, move.board);
     }
     return next;
+}
+
+function closeSimulatedBoard(state, initialBoardIndex) {
+    const boardsToClose = [initialBoardIndex];
+    const closedBoards = new Set();
+    while (boardsToClose.length) {
+        const boardIndex = boardsToClose.shift();
+        if (closedBoards.has(boardIndex)) continue;
+        closedBoards.add(boardIndex);
+        if (state.bigFields[boardIndex] === 0) state.bigFields[boardIndex] = CLOSED;
+        state.fields[boardIndex] = state.fields[boardIndex].map(value => value === 0 ? CLOSED : value);
+        if (miniTicTacToe) continue;
+        state.fields.forEach((board, otherBoardIndex) => {
+            if (state.bigFields[otherBoardIndex] !== 0 || board[boardIndex] !== 0) return;
+            board[boardIndex] = CLOSED;
+            if (!board.includes(0)) {
+                state.bigFields[otherBoardIndex] = CLOSED;
+                boardsToClose.push(otherBoardIndex);
+            }
+        });
+    }
 }
 
 function evaluateLine(board, line) {
